@@ -24,7 +24,13 @@ function DrawText3Ds(x, y, z, text)
 
 	if onScreen then
 		SetTextScale(0.35, 0.35)
-		SetTextFont(4)
+		if Config.Locale == 'sc' then
+			SetTextFont(12)
+		elseif Config.Locale == 'tc' then
+			SetTextFont(9)
+		else
+			SetTextFont(4)
+		end
 		SetTextProportional(1)
 		SetTextColour(255, 255, 255, 215)
 		SetTextEntry("STRING")
@@ -50,7 +56,7 @@ function CreateBlip(coords)
 	SetBlipAsShortRange(blip, true)
 
 	BeginTextCommandSetBlipName("STRING")
-	AddTextComponentString("Gas Station")
+	AddTextComponentString(_U('blips'))
 	EndTextCommandSetBlipName(blip)
 
 	return blip

@@ -1,12 +1,10 @@
-if Config.UseESX then
-	Citizen.CreateThread(function()
-		while not ESX do
-			TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+Citizen.CreateThread(function()
+	while not ESX do
+		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
-			Citizen.Wait(500)
-		end
-	end)
-end
+		Citizen.Wait(500)
+	end
+end)
 
 local isNearPump = false
 local isFueling = false
@@ -15,6 +13,21 @@ local currentCost = 0.0
 local currentCash = 1000
 local fuelSynced = false
 local inBlacklisted = false
+
+Config.Strings = {
+	ExitVehicle = _U('ExitVehicle'),
+	EToRefuel = _U('EToRefuel'),
+	JerryCanEmpty = _U('JerryCanEmpty'),
+	FullTank = _U('FullTank'),
+	PurchaseJerryCan = _U('PurchaseJerryCan',Config.JerryCanCost),
+	CancelFuelingPump = _U('CancelFuelingPump'),
+	CancelFuelingJerryCan = _U('CancelFuelingJerryCan'),
+	NotEnoughCash = _U('NotEnoughCash'),
+	RefillJerryCan = _U('RefillJerryCan'),
+	NotEnoughCashJerryCan = _U('NotEnoughCashJerryCan'),
+	JerryCanFull = _U('JerryCanFull'),
+	TotalCost = _U('TotalCost'),
+}
 
 function ManageFuelUsage(vehicle)
 	if not DecorExistOn(vehicle, Config.FuelDecor) then
@@ -82,10 +95,7 @@ Citizen.CreateThread(function()
 
 		if pumpDistance < 2.5 then
 			isNearPump = pumpObject
-
-			if Config.UseESX then
-				currentCash = ESX.GetPlayerData().money
-			end
+			currentCash = ESX.GetPlayerData().money
 		else
 			isNearPump = false
 
@@ -157,14 +167,12 @@ AddEventHandler('fuel:refuelFromPump', function(pumpObject, ped, vehicle)
 			local stringCoords = GetEntityCoords(pumpObject)
 			local extraString = ""
 
-			if Config.UseESX then
-				extraString = "\n" .. Config.Strings.TotalCost .. ": ~g~$" .. Round(currentCost, 1)
-			end
+			extraString = "\n" .. Config.Strings.TotalCost .. ": ~g~$" .. Round(currentCost, 1)
 
 			DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.CancelFuelingPump .. extraString)
 			DrawText3Ds(vehicleCoords.x, vehicleCoords.y, vehicleCoords.z + 0.5, Round(currentFuel, 1) .. "%")
 		else
-			DrawText3Ds(vehicleCoords.x, vehicleCoords.y, vehicleCoords.z + 0.5, Config.Strings.CancelFuelingJerryCan .. "\nGas can: ~g~" .. Round(GetAmmoInPedWeapon(ped, 883325847) / 4500 * 100, 1) .. "% | Vehicle: " .. Round(currentFuel, 1) .. "%")
+			DrawText3Ds(vehicleCoords.x, vehicleCoords.y, vehicleCoords.z + 0.5, Config.Strings.CancelFuelingJerryCan .. "\n".._U('gas_can').."~g~" .. Round(GetAmmoInPedWeapon(ped, 883325847) / 4500 * 100, 1) .. "%~w~ | ".._U('vehicle') .. "~g~" .. Round(currentFuel, 1) .. "%~w~")
 		end
 
 		if not IsEntityPlayingAnim(ped, "timetable@gardener@filling_can", "gar_ig_5_filling_can", 3) then
@@ -242,30 +250,22 @@ Citizen.CreateThread(function()
 								currentCash = ESX.GetPlayerData().money
 							end
 						else
-							if Config.UseESX then
-								local refillCost = Round(Config.RefillCost * (1 - GetAmmoInPedWeapon(ped, 883325847) / 4500))
+							local refillCost = Round(Config.RefillCost * (1 - GetAmmoInPedWeapon(ped, 883325847) / 4500))
 
-								if refillCost > 0 then
-									if currentCash >= refillCost then
-										DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.RefillJerryCan .. refillCost)
+							if refillCost > 0 then
+								if currentCash >= refillCost then
+									DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.RefillJerryCan .. refillCost)
 
-										if IsControlJustReleased(0, 38) then
-											TriggerServerEvent('fuel:pay', refillCost)
+									if IsControlJustReleased(0, 38) then
+										TriggerServerEvent('fuel:pay', refillCost)
 
-											SetPedAmmo(ped, 883325847, 4500)
-										end
-									else
-										DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.NotEnoughCashJerryCan)
+										SetPedAmmo(ped, 883325847, 4500)
 									end
 								else
-									DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.JerryCanFull)
+									DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.NotEnoughCashJerryCan)
 								end
 							else
-								DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.RefillJerryCan)
-
-								if IsControlJustReleased(0, 38) then
-									SetPedAmmo(ped, 883325847, 4500)
-								end
+								DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.JerryCanFull)
 							end
 						end
 					else
@@ -368,10 +368,10 @@ if Config.EnableHUD then
 	Citizen.CreateThread(function()
 		while true do
 			if displayHud then
-				DrawAdvancedText(0.130 - x, 0.77 - y, 0.005, 0.0028, 0.6, mph, 255, 255, 255, 255, 6, 1)
-				DrawAdvancedText(0.174 - x, 0.77 - y, 0.005, 0.0028, 0.6, kmh, 255, 255, 255, 255, 6, 1)
-				DrawAdvancedText(0.2195 - x, 0.77 - y, 0.005, 0.0028, 0.6, fuel, 255, 255, 255, 255, 6, 1)
-				DrawAdvancedText(0.148 - x, 0.7765 - y, 0.005, 0.0028, 0.4, "mp/h              km/h              Fuel", 255, 255, 255, 255, 6, 1)
+				DrawAdvancedText(0.130 - x, 0.77 - y, 0.005, 0.0028, 0.6, mph.." ~y~mp/h", 255, 255, 255, 255, 6, 1)
+				DrawAdvancedText(0.230 - x, 0.77 - y, 0.005, 0.0028, 0.6, kmh.." ~r~km/h", 255, 255, 255, 255, 6, 1)
+				DrawAdvancedText(0.330 - x, 0.77 - y, 0.005, 0.0028, 0.6, fuel.." ~g~Fuel", 255, 255, 255, 255, 6, 1)
+				-- DrawAdvancedText(0.148 - x, 0.7765 - y, 0.005, 0.0028, 0.4, "mp/h              km/h              Fuel", 255, 255, 255, 255, 6, 1)
 			else
 				Citizen.Wait(750)
 			end

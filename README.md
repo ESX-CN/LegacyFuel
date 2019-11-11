@@ -1,3 +1,6 @@
+### 说明
+已完全修改为esx版，简繁英自适应适用于魔改版esx，如不懂LUA语言请勿使用，必报错，使用官方esx需要注释`'@es_extended/i18n.lua',`
+
 ### About
 Started off as my first script, and for whatever reason, I decided to release it. As it was pretty badly created, I felt like I should rewrite it and make a better version, so ended up spending a few hours doing so.
 
