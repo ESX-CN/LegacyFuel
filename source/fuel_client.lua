@@ -179,7 +179,7 @@ AddEventHandler('fuel:refuelFromPump', function(pumpObject, ped, vehicle)
 			TaskPlayAnim(ped, "timetable@gardener@filling_can", "gar_ig_5_filling_can", 2.0, 8.0, -1, 50, 0, 0, 0, 0)
 		end
 
-		if IsControlJustReleased(0, 38) or DoesEntityExist(GetPedInVehicleSeat(vehicle, -1)) or (isNearPump and GetEntityHealth(pumpObject) <= 0) then
+		if IsControlJustReleased(0, 47) or DoesEntityExist(GetPedInVehicleSeat(vehicle, -1)) or (isNearPump and GetEntityHealth(pumpObject) <= 0) then
 			isFueling = false
 		end
 
@@ -220,7 +220,7 @@ Citizen.CreateThread(function()
 							if currentCash > 0 then
 								DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.EToRefuel)
 
-								if IsControlJustReleased(0, 38) then
+								if IsControlJustReleased(0, 47) then
 									isFueling = true
 
 									TriggerEvent('fuel:refuelFromPump', isNearPump, ped, vehicle)
@@ -242,7 +242,7 @@ Citizen.CreateThread(function()
 						if not HasPedGotWeapon(ped, 883325847) then
 							DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.PurchaseJerryCan)
 
-							if IsControlJustReleased(0, 38) then
+							if IsControlJustReleased(0, 47) then
 								GiveWeaponToPed(ped, 883325847, 4500, false, true)
 
 								TriggerServerEvent('fuel:pay', Config.JerryCanCost)
@@ -256,7 +256,7 @@ Citizen.CreateThread(function()
 								if currentCash >= refillCost then
 									DrawText3Ds(stringCoords.x, stringCoords.y, stringCoords.z + 1.2, Config.Strings.RefillJerryCan .. refillCost)
 
-									if IsControlJustReleased(0, 38) then
+									if IsControlJustReleased(0, 47) then
 										TriggerServerEvent('fuel:pay', refillCost)
 
 										SetPedAmmo(ped, 883325847, 4500)
